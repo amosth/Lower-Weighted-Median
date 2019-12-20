@@ -49,10 +49,11 @@ public class Progetto {
     public static double getWeightedMedian(double[] a, int p, int r) {
         System.out.println("\n************ DEBUG getWeightedMedian() ************");
 
+        double solution = 0;
         //Caso base (r e' uguale a p)
         if (r == p) {
             System.out.println("**Base case -> "+ a[p]);
-            return a[p];
+            solution = a[p];
         }
 
         //Partizione randomizzata dell'array a (da indice p ad indice r)
@@ -62,32 +63,27 @@ public class Progetto {
         double rightWeight = sumElements(a, q+1, a.length-1);
         double totalWeight = sumElements(a, 0, a.length-1);
 
-        //Caso base (leftWeight o rightWeight raggiungono esattamente 0.5)
-        if (leftWeight/totalWeight == 0.5) {
-            return a[q-1];
-        } else if (rightWeight/totalWeight == 0.5) {
-            return a[q];
-        }
-
         System.out.print("**DEBUG w(left) \u2248 "+ (Math.round(leftWeight * 100))/100.0);
         System.out.print(" ("+ Math.round(leftWeight/totalWeight * 10000.00)/100.0+"%)");
         System.out.print(", w(pivot) = "+ a[q] + " ("+ (Math.round(a[q]/totalWeight * 10000.00)/100.0) +"%)");
         System.out.print(", w(right) \u2248 "+ (Math.round(rightWeight * 100))/100.0);
         System.out.println(" ("+ Math.round(rightWeight/totalWeight * 10000.00)/100.0+"%)");
 
-        //Se le partizioni sono bilanciate, il pivot è la mediana (inferiore) pesata
-        if (leftWeight/totalWeight<0.5 && rightWeight/totalWeight<0.5) {
-            return a[q];
+        //Se si verifica la condizione della definizione di mediana (inferiore) pesata
+        if (leftWeight/totalWeight<0.5 && (leftWeight+a[q])/totalWeight>=0.5) {
+            solution = a[q];
         } else {
             //Assegna il peso del pivot alla partizione piu' leggera e richiama ricorsivamente getWeightedMedian()
             if (leftWeight > rightWeight) {
                 rightWeight += a[q]/totalWeight;
-                return getWeightedMedian(a, p, q-1);
-            } else {
+                solution = getWeightedMedian(a, p, q-1);
+            } else if (leftWeight < rightWeight) {
                 leftWeight += a[q]/totalWeight;
-                return getWeightedMedian(a, q+1, r);
+                solution = getWeightedMedian(a, q+1, r);
             }
         }
+
+        return solution;
     }
 
     /**
@@ -103,8 +99,7 @@ public class Progetto {
         System.out.println("**DEBUG before randPart(): "+Arrays.toString(a));
 
         //Seleziona il pivot randomicamente
-        //int index = (int) Math.round(random(123456789) * (r-p+1));
-        int index = getRandomIndex(p, r);
+        int index = p + (int) Math.floor(random(123456789) * (r-p+1));
 
         System.out.println("**DEBUG pivot: "+a[index]+" (index: "+index+")");
         double pivot = a[index];
@@ -175,7 +170,6 @@ public class Progetto {
         }
         return seed/m;
     }
-
 
     /**
      * Somma i valori degli elementi in un array di double

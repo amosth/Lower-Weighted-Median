@@ -1,11 +1,17 @@
 import java.util.Arrays;
 
 public class Misurazioni {
+    private static long[] testGranularita;
     private static String input;
     private static RandomGenerator rand = new RandomGenerator(123456789);
 
     public static void main(String[] args) {
-        System.out.println("Granularita': "+granularita()+"ms");
+
+        System.out.print("Test granularita' ");
+        for (int i = 0; i<10; i++) {
+            System.out.print("- "+granularita()+"ms ");
+        }
+        System.out.print("\n");
 
         /*
         for (int i = 1; i < 5; i++) {
@@ -19,8 +25,9 @@ public class Misurazioni {
             System.out.println(misurazione(input,10,1.96,100,0.02));
         }
         */
-        input = "0.1,0.5,1.5,3,2.2,0.05, 0.35 , 0.65, 0.8.";
-        System.out.println(misurazione(input,10,1.96,100,0.02));
+
+        input = "0.1,0.5,1.5,3,2.2,0.05, 0.35 , 0.65, 0.8,0.18,0.52.";
+        System.out.println(misurazione(input,5,1.96, 100, 0.05));
     }
 
     /**
@@ -50,58 +57,44 @@ public class Misurazioni {
         long t1 = 0;
         int rip = 1;
 
-        System.out.println("************** DEBUG calcolaRip **************");
-        System.out.println("** DEBUG primo while **");
         while((t1-t0) <= tMin) {
             rip = rip*2; //stima di rip con crescita esponenziale
             t0 = System.currentTimeMillis();
             for (int i = 1; i<=rip; i++) {
                 if (p) {
                     lordo(d);
-                    System.out.println("DEBUG lordo; rip: "+i+";");
                 } else {
                     importFromStdIn(d);
-                    System.out.println("DEBUG tara; rip: "+i+";");
                 }
             }
+            t1 = System.currentTimeMillis();
         }
-        System.out.println("** DEBUG fine primo while **");
 
         //ricerca esatta del numero di ripetizioni per bisezione a 5 cicli
         int max = rip;
         int min = rip/2;
         int cicliErrati = 5;
-        System.out.println("DEBUG ricerca numero rip; max: "+max+"; min"+min+"; cicliErrati"+cicliErrati+";");
 
-        System.out.println("** DEBUG secondo while **");
         while ((max-min) >= cicliErrati) {
             rip = (max+min)/2;
             t0 = System.currentTimeMillis();
             for (int i = 1; i<=rip; i++) {
                 if (p) {
                     lordo(d);
-                    System.out.println("DEBUG secondo while lordo; rip: "+i+";");
                 } else {
                     importFromStdIn(d);
-                    System.out.println("DEBUG secondo while tara; rip: "+i+";");
                 }
             }
-
             t1 = System.currentTimeMillis();
 
             if ((t1-t0) <= tMin) {
                 min = rip;
-                System.out.println("DEBUG min: "+min+";");
             } else {
                 max = rip;
-                System.out.println("DEBUG max: "+max+";");
             }
         }
-        System.out.println("** DEBUG fine secondo while **");
-        System.out.println("************** DEBUG fine calcolaRip **************");
 
         return max;
-
     }
 
     /**
@@ -111,35 +104,33 @@ public class Misurazioni {
      * @param tMin valore del tempo minimo
      * @return il tempo medio di esecuzione
      */
-    public static long tempoMedioNetto(String d, long tMin) {
+    public static double tempoMedioNetto(String d, long tMin) {
         int ripTara = calcolaRip(false, d, tMin);
         int ripLordo = calcolaRip(true, d, tMin);
-        System.out.println("\n************** DEBUG tempoMedioNetto **************");
-        System.out.println("DEBUG ripTara: "+ripTara+"; ripLordo: "+ripLordo+";");
+        System.out.println("\n********* DEBUG tempoMedioNetto **********");
 
         long t0 = System.currentTimeMillis();
+        System.out.println("* ripTara: "+ripTara+"; ripLordo: "+ripLordo+";");
         for (int i = 1; i<=ripTara; i++) {
             importFromStdIn(d);
-            System.out.println("DEBUG in ciclo esecuzione tara; i: "+i+";");
         }
 
         long t1 = System.currentTimeMillis();
         long tTara = t1-t0; //tempo totale di esecuzione della tara
-        System.out.println("DEBUG tTara (t1-t0): "+tTara+";");
+        System.out.println("* tTara: "+tTara+"ms;");
 
         t0 = System.currentTimeMillis();
         for (int i=1; i<=ripLordo; i++) {
             lordo(d);
-            System.out.println("DEBUG in ciclo esecuzione lordo; i: "+i+";");
         }
 
         t1 = System.currentTimeMillis();
         long tLordo = t1-t0; //tempo totale di esecuzione del lordo
-        System.out.println("DEBUG tLordo (t1-t0): "+tLordo+";");
-        long tMedio = tLordo/ripLordo - tTara/ripTara; //tempo medio di esecuzione
-        System.out.println("DEBUG tMedio: "+tMedio+";");
+        System.out.println("* tLordo: "+tLordo+"ms;");
+        double tMedio = tLordo/ripLordo + tTara/ripTara; //tempo medio di esecuzione CANCARO
+        System.out.println("* tMedio: "+tMedio+"ms;");
 
-        System.out.println("************** DEBUG fine tempoMedioNetto **************");
+        System.out.println("******* DEBUG fine tempoMedioNetto *******");
 
         return tMedio;
     }
@@ -155,33 +146,33 @@ public class Misurazioni {
      * @return stringa contenente
      */
     public static String misurazione(String d, int c, double za, long tMin, double capitalDelta) {
-        long t = 0;
-        long sum2 = 0;
-        long m = 0;
+        double t = 0;
+        double sum2 = 0;
+        double m = 0;
         int cn = 0;
         double delta = 0;
         double s = 0;
         double e = 0;
 
-        System.out.println("\n************** DEBUG misurazione **************");
+        System.out.println("\n******************** DEBUG misurazione ********************");
 
-        while (delta >= capitalDelta) {
+        do {
             for (int i = 1; i<=c; i++) {
                 m = tempoMedioNetto(d, tMin);
                 t = t + m;
                 sum2 = sum2 + m*m;
-                System.out.println("DEBUG m: "+m+"; t: "+t+"; sum2: "+sum2+";");
+                System.out.println("m: "+m+"; t: "+t+"; sum2: "+sum2+";");
             }
             cn = cn + c;
             e = t/cn;
             s = Math.sqrt(sum2/cn - e*e);
             delta = (1/Math.sqrt(cn)) * za * s;
             System.out.println("DEBUG cn: "+cn+"; e: "+e+"; s: "+s+"; delta: "+delta+";");
-        }
+        } while (delta >= capitalDelta);
 
-        System.out.println("\n************** DEBUG fine misurazione **************");
+        System.out.println("\n***************** DEBUG fine misurazione ******************");
 
-        return c + ";" + e + ";" + delta + ";\n";
+        return cn + ";" + e + ";" + delta + ";\n";
     }
 
     /**
@@ -248,7 +239,6 @@ public class Misurazioni {
             }
         }
 
-        System.out.println("**DEBUG mediana trovata: "+solution);
         return solution;
     }
 

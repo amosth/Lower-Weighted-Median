@@ -1,14 +1,25 @@
-//Classe che genera numeri casuali, migliore del random di sistema
+/**
+ * Questa classe genera numeri casuali.
+ *
+ * @author  Amos Cappellaro
+ * @version 1.0
+ * @since   2019-12-31
+ */
 public class RandomGenerator {
-    // variabile che tiene memorizzato il seme
     private double seed;
 
-    // costruttore della classe, genera un'istanza di RandomGenerator, fissando il seme iniziale a s.
+    /**
+     * Costruttore della classe, genera un'istanza di RandomGenerator, fissando il seme iniziale a s.
+     */
     public RandomGenerator(double s) {
         seed = s;
     }
 
-    // get(): restituisce un numero compreso tra 0 e 1 (e aggiorna il seme)
+    /**
+     * Restituisce un numero compreso tra 0 e 1 (ed aggiorna il seme) (Algoritmo 8 degli appunti)
+     *
+     * @return seed/m un numero compreso tra 0 e 1
+     */
     public double get() {
         // Costanti
         final int a = 16087;
@@ -16,7 +27,6 @@ public class RandomGenerator {
         final int q = 127773;
         final int r = 2836;
 
-        // Variabili
         double lo, hi, test;
 
         hi = Math.ceil(seed / q);

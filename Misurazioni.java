@@ -1,5 +1,11 @@
-import java.util.Arrays;
-
+/**
+ * Questo programma esegue un'analisi empirica della complessità dell'algoritmo implementato
+ * nella classe Progetto (tutti i metodi utilizzati sono stati presenti in questa classe).
+ *
+ * @author  Amos Cappellaro
+ * @version 1.0
+ * @since   2019-12-31
+ */
 public class Misurazioni {
     private static long[] testGranularita;
     private static String input;
@@ -7,31 +13,28 @@ public class Misurazioni {
 
     public static void main(String[] args) {
 
+        //Esecuzione di 10 test per il calcolo di granularita' di sistema
         System.out.print("Test granularita' ");
         for (int i = 0; i<10; i++) {
             System.out.print("- "+granularita()+"ms ");
         }
-        System.out.print("\n");
+        System.out.print("\n\n");
 
-        /*
-        for (int i = 1; i < 5; i++) {
+        //Generazione di input (di dimensione da 1 a 120) con valori casuali
+        for (int i = 1; i <= 120; i++) {
             input = "";
             for (int j = 1; j < i; j++) {
                 input += Math.round((rand.get() * 100) * 100.0) / 100.0 + ",";
             }
             input += Math.round((rand.get() * 100) * 100.0) / 100.0 + ".";
-            System.out.println("Input: "+input);
 
-            System.out.println(misurazione(input,10,1.96,100,0.02));
+            //Misurazione dei tempi tramite misurazione() (vedi Algoritmo 9 degli appunti)
+            System.out.println(misurazione(input,i,2.33,150,0.02));
         }
-        */
-
-        input = "0.1,0.5,1.5,3,2.2,0.05, 0.35 , 0.65, 0.8,0.18,0.52.";
-        System.out.println(misurazione(input,5,1.96, 100, 0.05));
     }
 
     /**
-     * Calcola la granularita' del sistema (Algoritmo 4)
+     * Calcola la granularita' del sistema (Algoritmo 4 degli appunti)
      *
      * @return la granularita'
      */
@@ -45,7 +48,7 @@ public class Misurazioni {
     }
 
     /**
-     * Calcola il numero di ripetizioni (Algoritmo 5)
+     * Calcola il numero di ripetizioni (Algoritmo 5 degli appunti)
      *
      * @param p determinare se eseguire il 'lordo' o 'tara' del programma
      * @param d input
@@ -98,26 +101,23 @@ public class Misurazioni {
     }
 
     /**
-     * Scorporo della tara dal lordo (Algoritmo 7)
+     * Scorporo della tara dal lordo (Algoritmo 7 degli appunti)
      *
      * @param d input
      * @param tMin valore del tempo minimo
      * @return il tempo medio di esecuzione
      */
     public static double tempoMedioNetto(String d, long tMin) {
-        int ripTara = calcolaRip(false, d, tMin);
-        int ripLordo = calcolaRip(true, d, tMin);
-        System.out.println("\n********* DEBUG tempoMedioNetto **********");
+        double ripTara = calcolaRip(false, d, tMin);
+        double ripLordo = calcolaRip(true, d, tMin);
 
         long t0 = System.currentTimeMillis();
-        System.out.println("* ripTara: "+ripTara+"; ripLordo: "+ripLordo+";");
         for (int i = 1; i<=ripTara; i++) {
             importFromStdIn(d);
         }
 
         long t1 = System.currentTimeMillis();
-        long tTara = t1-t0; //tempo totale di esecuzione della tara
-        System.out.println("* tTara: "+tTara+"ms;");
+        double tTara = t1-t0; //tempo totale di esecuzione della tara
 
         t0 = System.currentTimeMillis();
         for (int i=1; i<=ripLordo; i++) {
@@ -125,18 +125,14 @@ public class Misurazioni {
         }
 
         t1 = System.currentTimeMillis();
-        long tLordo = t1-t0; //tempo totale di esecuzione del lordo
-        System.out.println("* tLordo: "+tLordo+"ms;");
-        double tMedio = tLordo/ripLordo + tTara/ripTara; //tempo medio di esecuzione CANCARO
-        System.out.println("* tMedio: "+tMedio+"ms;");
-
-        System.out.println("******* DEBUG fine tempoMedioNetto *******");
+        double tLordo = t1-t0; //tempo totale di esecuzione del lordo
+        double tMedio = tLordo/ripLordo + tTara/ripTara; //tempo medio di esecuzione
 
         return tMedio;
     }
 
     /**
-     * Determina il tempo medio con un errore minore di 'capitalDelta' (Algoritmo 9)
+     * Determina il tempo medio con un errore minore di 'capitalDelta' (Algoritmo 9 degli appunti)
      *
      * @param d
      * @param n
@@ -154,25 +150,19 @@ public class Misurazioni {
         double s = 0;
         double e = 0;
 
-        System.out.println("\n******************** DEBUG misurazione ********************");
-
         do {
             for (int i = 1; i<=c; i++) {
                 m = tempoMedioNetto(d, tMin);
                 t = t + m;
                 sum2 = sum2 + m*m;
-                System.out.println("m: "+m+"; t: "+t+"; sum2: "+sum2+";");
             }
             cn = cn + c;
             e = t/cn;
             s = Math.sqrt(sum2/cn - e*e);
             delta = (1/Math.sqrt(cn)) * za * s;
-            System.out.println("DEBUG cn: "+cn+"; e: "+e+"; s: "+s+"; delta: "+delta+";");
         } while (delta >= capitalDelta);
 
-        System.out.println("\n***************** DEBUG fine misurazione ******************");
-
-        return cn + ";" + e + ";" + delta + ";\n";
+        return c + ";" + e + ";" + delta + ";";
     }
 
     /**
@@ -203,12 +193,9 @@ public class Misurazioni {
      * @return mediana (inferiore) pesata
      */
     public static double getWeightedMedian(double[] a, int p, int r) {
-        //System.out.println("\n************ DEBUG getWeightedMedian() ************");
-
         double solution = 0;
         //Caso base (r e' uguale a p)
         if (r == p) {
-            //System.out.println("**Base case -> "+ a[p]);
             solution = a[p];
         }
 
@@ -218,12 +205,6 @@ public class Misurazioni {
         double leftWeight = sumElements(a, 0, q-1);
         double rightWeight = sumElements(a, q+1, a.length-1);
         double totalWeight = sumElements(a, 0, a.length-1);
-
-        //System.out.print("**DEBUG w(left) \u2248 "+ (Math.round(leftWeight * 100))/100.0);
-        //System.out.print(" ("+ Math.round(leftWeight/totalWeight * 10000.00)/100.0+"%)");
-        //System.out.print(", w(pivot) = "+ a[q] + " ("+ (Math.round(a[q]/totalWeight * 10000.00)/100.0) +"%)");
-        //System.out.print(", w(right) \u2248 "+ (Math.round(rightWeight * 100))/100.0);
-        //System.out.println(" ("+ Math.round(rightWeight/totalWeight * 10000.00)/100.0+"%)");
 
         //Se si verifica la condizione della definizione di mediana (inferiore) pesata
         if (leftWeight/totalWeight<0.5 && (leftWeight+a[q])/totalWeight>=0.5) {
@@ -252,13 +233,9 @@ public class Misurazioni {
      * @return il valore 'pivot'
      */
     public static int randomizedPartition(double[] a, int p, int r) {
-        //System.out.println("**DEBUG before randPart(): "+Arrays.toString(a));
-
         //Seleziona il pivot randomicamente
         RandomGenerator rand = new RandomGenerator(123456789);
         int index = p + (int) Math.floor(rand.get() * (r-p+1));
-
-        //System.out.println("**DEBUG pivot: "+a[index]+" (index: "+index+")");
         double pivot = a[index];
 
         //Scambio a[index] con a[r] (si vuole spostare il pivot in fondo)
@@ -275,8 +252,6 @@ public class Misurazioni {
         }
         //Scambio a[i+1] con a[r]
         swap(a, i+1, r);
-
-        //System.out.println("**DEBUG after randPart(): "+Arrays.toString(a));
 
         return i+1;
     }

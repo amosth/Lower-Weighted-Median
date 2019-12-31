@@ -1,6 +1,13 @@
 import java.util.Scanner;
-//import java.util.Arrays;
 
+/**
+ * Questo programma, dati un input con valori razionali positivi su StdIn, separati da
+ * ',' e terminante con '.', fornisce in output (stdOut) la mediana (inferiore) pesata.
+ *
+ * @author  Amos Cappellaro
+ * @version 1.0
+ * @since   2019-12-31
+ */
 public class Progetto {
     private static Scanner scanner;
     private static String input;
@@ -15,7 +22,7 @@ public class Progetto {
         //Parsing dell'input
         double[] sample = importFromStdIn(input);
 
-        //Calcolo e stampa della mediana (inferiore) pesata
+        //Calcolo e stampa in stdOut della mediana (inferiore) pesata
         System.out.println("Output:\n"+getWeightedMedian(sample, 0, sample.length-1));
     }
 
@@ -47,12 +54,9 @@ public class Progetto {
      * @return mediana (inferiore) pesata
      */
     public static double getWeightedMedian(double[] a, int p, int r) {
-        //System.out.println("\n************ DEBUG getWeightedMedian() ************");
-
         double solution = 0;
         //Caso base (r e' uguale a p)
         if (r == p) {
-            //System.out.println("**Base case -> "+ a[p]);
             solution = a[p];
         }
 
@@ -62,12 +66,6 @@ public class Progetto {
         double leftWeight = sumElements(a, 0, q-1);
         double rightWeight = sumElements(a, q+1, a.length-1);
         double totalWeight = sumElements(a, 0, a.length-1);
-
-        //System.out.print("**DEBUG w(left) \u2248 "+ (Math.round(leftWeight * 100))/100.0);
-        //System.out.print(" ("+ Math.round(leftWeight/totalWeight * 10000.00)/100.0+"%)");
-        //System.out.print(", w(pivot) = "+ a[q] + " ("+ (Math.round(a[q]/totalWeight * 10000.00)/100.0) +"%)");
-        //System.out.print(", w(right) \u2248 "+ (Math.round(rightWeight * 100))/100.0);
-        //System.out.println(" ("+ Math.round(rightWeight/totalWeight * 10000.00)/100.0+"%)");
 
         //Se si verifica la condizione della definizione di mediana (inferiore) pesata
         if (leftWeight/totalWeight<0.5 && (leftWeight+a[q])/totalWeight>=0.5) {
@@ -96,13 +94,10 @@ public class Progetto {
      * @return il valore 'pivot'
      */
     public static int randomizedPartition(double[] a, int p, int r) {
-        //System.out.println("**DEBUG before randPart(): "+Arrays.toString(a));
-
         //Seleziona il pivot randomicamente
         RandomGenerator rand = new RandomGenerator(123456789);
         int index = p + (int) Math.floor(rand.get() * (r-p+1));
 
-        //System.out.println("**DEBUG pivot: "+a[index]+" (index: "+index+")");
         double pivot = a[index];
 
         //Scambio a[index] con a[r] (si vuole spostare il pivot in fondo)
@@ -119,8 +114,6 @@ public class Progetto {
         }
         //Scambio a[i+1] con a[r]
         swap(a, i+1, r);
-
-        //System.out.println("**DEBUG after randPart(): "+Arrays.toString(a));
 
         return i+1;
     }
@@ -153,17 +146,5 @@ public class Progetto {
         }
 
         return sum;
-    }
-
-    /**
-     * Metodo funzionale alla misurazione dei tempi (serve a determinare
-     * l'esecuzione del programma 'lordo' in funzione del tempo)
-     *
-     * @param input la stringa dei valori in input
-     * @return la mediana (inferiore) pesata
-     */
-    public static double lordo(String input) {
-        double[] sample = importFromStdIn(input);
-        return getWeightedMedian(sample, 0, sample.length-1);
     }
 }
